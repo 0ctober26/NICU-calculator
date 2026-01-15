@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="NICU계산기">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  
+  <title>NICU 계산기</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+                   "Noto Sans KR", system-ui, sans-serif;
+      background: #f1f5f9;
+      padding: 20px;
+      max-width: 420px;
+      margin: auto;
+    }
+
+    h1 {
+      font-size: 22px;
+      text-align: center;
+      margin-bottom: 20px;
+      color: #1e3a8a;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      background: white;
+      padding: 8px;
+      border-radius: 14px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    }
+
+    .tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: #64748b;
+    }
+
+    .tab.active {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .card {
+      background: white;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+      margin-bottom: 16px;
+    }
+
+    label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #334155;
+      margin-top: 14px;
+      display: block;
+    }
+
+    .label-sub {
+      font-size: 12px;
+      font-weight: 400;
+      color: #64748b;
+      margin-left: 4px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin-top: 6px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #3b82f6;
+      background: white;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+    }
+
+    .input-group > div {
+      flex: 1;
+    }
+
+    .radio-group {
+      display: flex;
+      justify-content: space-between;
+      background: #eff6ff;
+      padding: 10px 14px;
+      border-radius: 12px;
+      margin-top: 12px;
+      gap: 8px;
+    }
+
+    .radio-group label {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 15px;
+      margin: 0;
+    }
+
+    .radio-group input {
+      accent-color: #2563eb;
+      width: auto;
+      padding: 0;
+      margin: 0;
+    }
+
+    .custom-input {
+      margin-top: 10px;
+      display: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 20px;
+      font-size: 17px;
+      font-weight: 600;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #10b981, #059669);
+      margin-top: 10px;
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      font-size: 14px;
+      padding: 8px;
+      margin-top: 0;
+      margin-left: 8px;
+      width: auto;
+    }
+
+    .result {
+      background: white;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    }
+
+    .summary {
+      font-size: 14px;
+      color: #334155;
+      margin-bottom: 10px;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      font-size: 16px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .result-row:last-child {
+      border-bottom: none;
+    }
+
+    .result-row span:first-child {
+      color: #64748b;
+    }
+
+    .result-row span:last-child {
+      font-weight: 700;
+      color: #1e40af;
+    }
+
+    .result-highlight {
+      background: #fef3c7;
+      margin: -10px 0;
+      padding: 10px 0;
+      border-radius: 8px;
+    }
+
+    .preset-buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .preset-btn {
+      flex: 1;
+      padding: 8px;
+      font-size: 13px;
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .preset-btn:active {
+      background: #e2e8f0;
+    }
+
+    .change-item {
+      background: #f8fafc;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      border-left: 4px solid #3b82f6;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .change-info {
+      flex: 1;
+    }
+
+    .change-time {
+      font-weight: 600;
+      color: #1e40af;
+      font-size: 15px;
+    }
+
+    .change-volume {
+      color: #64748b;
+      font-size: 14px;
+      margin-top: 2px;
+    }
+
+    .section-title {
+      font-weight: 600;
+      margin-top: 16px;
+      margin-bottom: 8px;
+      color: #1e3a8a;
+      font-size: 15px;
+    }
+
+    .night {
+      background: #f1f5ff;
+      border-radius: 8px;
+      margin: -10px 0;
+      padding: 10px 0;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>💉 NICU 계산기</h1>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('civ')">CIV 약물</div>
+  <div class="tab" onclick="switchTab('fluid')">수액보완</div>
+</div>
+
+<!-- CIV 약물 탭 -->
+<div id="civ" class="tab-content active">
+  <div class="card">
+    <label>약물 선택</label>
+    <select id="drug_select" onchange="loadDrugDefaults()">
+      <option value="dopamine">Dopamine</option>
+      <option value="fentanyl">Fentanyl</option>
+    </select>
+
+    <label>체중 <span class="label-sub">(kg)</span></label>
+    <input type="number" id="civ_weight" step="0.01" inputmode="decimal" placeholder="예: 2.5">
+
+    <label>원액 농도</label>
+    <div class="input-group">
+      <div>
+        <input type="number" id="civ_drug_amount" step="1" inputmode="numeric" placeholder="약물량">
+      </div>
+      <div>
+        <select id="civ_drug_unit">
+          <option value="mg">mg</option>
+          <option value="mcg">mcg</option>
+        </select>
+      </div>
+      <div style="flex: 0 0 20px; text-align: center; padding-bottom: 12px; font-size: 16px; color: #64748b;">/</div>
+      <div>
+        <input type="number" id="civ_drug_ml" step="0.1" inputmode="decimal" placeholder="용량 (mL)">
+      </div>
+    </div>
+
+    <label>희석 비율 <span class="label-sub">(합계 10)</span></label>
+    <div class="input-group">
+      <div>
+        <input type="number" id="civ_ratio_drug" step="0.5" inputmode="decimal" placeholder="원액" oninput="adjustRatio()">
+      </div>
+      <div style="flex: 0 0 30px; text-align: center; padding-bottom: 12px; font-size: 20px; color: #64748b;">:</div>
+      <div>
+        <input type="number" id="civ_ratio_dilution" step="0.5" inputmode="decimal" placeholder="D5W" readonly style="background: #e2e8f0;">
+      </div>
+    </div>
+
+    <div class="preset-buttons" id="civ_presets">
+      <!-- 약물별 프리셋 버튼 동적 생성 -->
+    </div>
+
+    <label>목표 투여량 <span class="label-sub" id="civ_dose_unit">(mcg/kg/min)</span></label>
+    <input type="number" id="civ_dose" step="0.1" inputmode="decimal" placeholder="예: 5">
+
+    <button onclick="calculateCIV()">계산하기</button>
+  </div>
+
+  <div id="civ_result" class="result" style="display:none;"></div>
+</div>
+
+<!-- 수액보완 탭 -->
+<div id="fluid" class="tab-content">
+  <div class="card">
+    <label>체중 <span class="label-sub">(kg)</span></label>
+    <input type="number" id="fluid_weight" step="0.01" inputmode="decimal" placeholder="예: 2.5">
+
+    <label>체중당 수액량 <span class="label-sub">(mL/kg/day)</span></label>
+    <input type="number" id="fluid_volume_per_kg" step="1" inputmode="numeric" placeholder="예: 150">
+
+    <label>회당 기본 수유량 <span class="label-sub">(mL)</span></label>
+    <input type="number" id="fluid_base_feeding" step="1" inputmode="numeric" placeholder="예: 40" oninput="updateCustomMax()">
+
+    <label>수유량 포함 방식</label>
+    <div class="radio-group">
+      <label><input type="radio" name="include_method" value="full" checked onchange="toggleCustomInput()"> 전체</label>
+      <label><input type="radio" name="include_method" value="half" onchange="toggleCustomInput()"> 반만</label>
+      <label><input type="radio" name="include_method" value="custom" onchange="toggleCustomInput()"> 직접입력</label>
+    </div>
+
+    <div class="custom-input" id="custom_include_input">
+      <label>수유량 중 포함량 <span class="label-sub" id="custom_max_label">(mL, 최대 40)</span></label>
+      <input type="number" id="custom_include_ml" step="1" min="0" inputmode="numeric" placeholder="예: 30">
+    </div>
+
+    <button onclick="calculateBaseFluid()">계산하기</button>
+  </div>
+
+  <div id="fluid_base_result" class="result" style="display:none;"></div>
+
+  <div class="card" id="fluid_change_section" style="display:none;">
+    <div class="section-title">수유량 변경</div>
+    
+    <label>변경 시각</label>
+    <div class="input-group">
+      <div>
+        <select id="change_hour">
+          <option value="">시</option>
+          <script>
+            for (let i = 0; i < 24; i++) {
+              document.write(`<option value="${i}">${String(i).padStart(2,'0')}시</option>`);
+            }
+          </script>
+        </select>
+      </div>
+      <div>
+        <select id="change_minute">
+          <option value="0" selected>00</option>
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="30">30</option>
+          <option value="40">40</option>
+          <option value="50">50</option>
+        </select>
+      </div>
+    </div>
+
+    <label>변경 후 수유량 <span class="label-sub">(mL)</span></label>
+    <input type="number" id="change_volume" step="1" inputmode="numeric" placeholder="예: 10">
+
+    <button class="btn-secondary" onclick="addChange()">변경 추가</button>
+
+    <div id="changes_summary" style="display:none; margin-top: 16px;">
+      <div class="section-title">변경 내역</div>
+      <div id="changes_container"></div>
+    </div>
+  </div>
+
+  <div id="fluid_final_result" class="result" style="display:none;"></div>
+</div>
+
+<script>
+// 약물 기본값
+const DRUG_DEFAULTS = {
+  dopamine: {
+    amount: 200,
+    unit: 'mg',
+    ml: 5,
+    ratioDrug: 1,
+    presets: [
+      { drug: 0.5, dilution: 9.5, label: '0.5:9.5' },
+      { drug: 1, dilution: 9, label: '1:9' },
+      { drug: 2, dilution: 8, label: '2:8' }
+    ],
+    doseUnit: '(mcg/kg/min)'
+  },
+  fentanyl: {
+    amount: 500,
+    unit: 'mcg',
+    ml: 10,
+    ratioDrug: 2,
+    presets: [
+      { drug: 1, dilution: 9, label: '1:9' },
+      { drug: 2, dilution: 8, label: '2:8' },
+      { drug: 3, dilution: 7, label: '3:7' }
+    ],
+    doseUnit: '(mcg/kg/min)'
+  }
+};
+
+// 수유 시간 고정
+const FEED_TIMES = [7, 10, 13, 16, 19, 23, 2, 5];
+
+// 수액 계산 전역 변수
+let baseFluidData = null;
+let fluidChanges = [];
+
+// 탭 전환
+function switchTab(tabName) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  
+  event.target.classList.add('active');
+  document.getElementById(tabName).classList.add('active');
+}
+
+// 약물 선택 시 기본값 로드
+function loadDrugDefaults() {
+  const drugType = document.getElementById('drug_select').value;
+  const defaults = DRUG_DEFAULTS[drugType];
+  
+  document.getElementById('civ_drug_amount').value = defaults.amount;
+  document.getElementById('civ_drug_unit').value = defaults.unit;
+  document.getElementById('civ_drug_ml').value = defaults.ml;
+  document.getElementById('civ_ratio_drug').value = defaults.ratioDrug;
+  document.getElementById('civ_ratio_dilution').value = 10 - defaults.ratioDrug;
+  document.getElementById('civ_dose_unit').textContent = defaults.doseUnit;
+  
+  // 프리셋 버튼 생성
+  const presetsContainer = document.getElementById('civ_presets');
+  presetsContainer.innerHTML = '';
+  defaults.presets.forEach(preset => {
+    const btn = document.createElement('button');
+    btn.className = 'preset-btn';
+    btn.textContent = preset.label;
+    btn.onclick = () => setRatioPreset(preset.drug);
+    presetsContainer.appendChild(btn);
+  });
+}
+
+// 비율 자동 조정 (합계 10)
+function adjustRatio() {
+  const drugRatio = parseFloat(document.getElementById('civ_ratio_drug').value) || 0;
+  if (drugRatio > 10) {
+    document.getElementById('civ_ratio_drug').value = 10;
+    document.getElementById('civ_ratio_dilution').value = 0;
+  } else {
+    document.getElementById('civ_ratio_dilution').value = (10 - drugRatio).toFixed(1);
+  }
+}
+
+// 비율 프리셋
+function setRatioPreset(drugValue) {
+  document.getElementById('civ_ratio_drug').value = drugValue;
+  adjustRatio();
+}
+
+// 직접입력 토글
+function toggleCustomInput() {
+  const customSelected = document.querySelector('input[name="include_method"]:checked').value === 'custom';
+  document.getElementById('custom_include_input').style.display = customSelected ? 'block' : 'none';
+}
+
+// 직접입력 최대값 업데이트
+function updateCustomMax() {
+  const baseFeeding = parseFloat(document.getElementById('fluid_base_feeding').value) || 40;
+  document.getElementById('custom_max_label').textContent = `(mL, 최대 ${baseFeeding})`;
+  document.getElementById('custom_include_ml').max = baseFeeding;
+}
+
+// CIV 약물 계산
+function calculateCIV() {
+  const weight = parseFloat(document.getElementById('civ_weight').value);
+  const drugAmount = parseFloat(document.getElementById('civ_drug_amount').value);
+  const drugUnit = document.getElementById('civ_drug_unit').value;
+  const drugMl = parseFloat(document.getElementById('civ_drug_ml').value);
+  const ratioDrug = parseFloat(document.getElementById('civ_ratio_drug').value);
+  const ratioDilution = parseFloat(document.getElementById('civ_ratio_dilution').value);
+  const targetDose = parseFloat(document.getElementById('civ_dose').value);
+
+  if (!weight || !drugAmount || !drugMl || !targetDose) {
+    alert('모든 값을 입력해주세요.');
+    return;
+  }
+
+  // 원액 농도
+  const stockConc = drugAmount / drugMl;
+  
+  // 최종 농도 (비율 기준)
+  const finalConc = stockConc * (ratioDrug / 10);
+  
+  // 펌프 속도 계산
+  let pumpRate;
+  if (drugUnit === 'mg') {
+    // mg 단위: mcg/kg/min → mg/kg/min
+    const targetDoseMg = targetDose / 1000;
+    const requiredDrugMgMin = targetDoseMg * weight;
+    pumpRate = (requiredDrugMgMin / finalConc) * 60;
+  } else {
+    // mcg 단위
+    const requiredDrugMcgMin = targetDose * weight;
+    pumpRate = (requiredDrugMcgMin / finalConc) * 60;
+  }
+  
+  // 시간당 투여량
+  const drugPerHour = (targetDose * weight * 60) / (drugUnit === 'mg' ? 1000 : 1);
+
+  document.getElementById('civ_result').innerHTML = `
+    <div class="summary">
+      원액 농도: <b>${stockConc.toFixed(drugUnit === 'mg' ? 1 : 0)} ${drugUnit}/mL</b><br>
+      희석 비율: <b>${ratioDrug} : ${ratioDilution}</b>
+    </div>
+    <div class="result-row">
+      <span>최종 농도</span>
+      <span>${finalConc.toFixed(drugUnit === 'mg' ? 3 : 2)} ${drugUnit}/mL</span>
+    </div>
+    <div class="result-row result-highlight">
+      <span>펌프 속도</span>
+      <span>${pumpRate.toFixed(2)} mL/hr</span>
+    </div>
+    <div class="result-row">
+      <span>시간당 약물량</span>
+      <span>${drugPerHour.toFixed(drugUnit === 'mg' ? 3 : 2)} ${drugUnit}/hr</span>
+    </div>
+  `;
+  document.getElementById('civ_result').style.display = 'block';
+}
+
+// 기본 수액 계산
+function calculateBaseFluid() {
+  const weight = parseFloat(document.getElementById('fluid_weight').value);
+  const volumePerKg = parseFloat(document.getElementById('fluid_volume_per_kg').value);
+  const baseFeeding = parseFloat(document.getElementById('fluid_base_feeding').value);
+  const includeMethod = document.querySelector('input[name="include_method"]:checked').value;
+
+  if (!weight || !volumePerKg || !baseFeeding) {
+    alert('모든 값을 입력해주세요.');
+    return;
+  }
+
+  // 직접입력 시 mL 확인
+  let includeMl;
+  let feedingLabel;
+  if (includeMethod === 'full') {
+    includeMl = baseFeeding;
+    feedingLabel = `전체 포함`;
+  } else if (includeMethod === 'half') {
+    includeMl = baseFeeding * 0.5;
+    feedingLabel = `반만 포함`;
+  } else {
+    includeMl = parseFloat(document.getElementById('custom_include_ml').value);
+    if (!includeMl || includeMl < 0 || includeMl > baseFeeding) {
+      alert(`포함량을 0~${baseFeeding}mL 사이로 입력해주세요.`);
+      return;
+    }
+    feedingLabel = `직접입력 (${includeMl}mL)`;
+  }
+
+  // 총 필요량
+  const totalRequired = weight * volumePerKg;
+  
+  // 하루 수유 총량 (8회)
+  const totalFeeding = baseFeeding * 8;
+  
+  // 실제 수유량 (포함량 기준)
+  const effectiveFeeding = includeMl * 8;
+  
+  // 수액으로 보충
+  const fluidSupply = totalRequired - effectiveFeeding;
+  const fluidPerHour = fluidSupply / 24;
+
+  baseFluidData = {
+    weight,
+    volumePerKg,
+    totalRequired,
+    baseFeeding,
+    totalFeeding,
+    includeMethod,
+    includeMl,
+    effectiveFeeding,
+    fluidSupply,
+    fluidPerHour
+  };
+
+  document.getElementById('fluid_base_result').innerHTML = `
+    <div class="summary">
+      총 필요 수액량: <b>${totalRequired.toFixed(0)} mL/day</b><br>
+      하루 수유 총량: <b>${totalFeeding.toFixed(0)} mL</b> (${baseFeeding}mL × 8회)<br>
+      포함 방식: <b>${feedingLabel}</b>
+    </div>
+    <div class="result-row">
+      <span>실제 수유 적용량</span>
+      <span>${effectiveFeeding.toFixed(0)} mL/day</span>
+    </div>
+    <div class="result-row result-highlight">
+      <span>수액 보충량</span>
+      <span>${fluidSupply.toFixed(0)} mL/day</span>
+    </div>
+    <div class="result-row result-highlight">
+      <span>기본 수액 속도</span>
+      <span>${fluidPerHour.toFixed(2)} mL/hr</span>
+    </div>
+  `;
+  
+  document.getElementById('fluid_base_result').style.display = 'block';
+  document.getElementById('fluid_change_section').style.display = 'block';
+  
+  // 변경 내역 초기화
+  fluidChanges = [];
+  document.getElementById('changes_summary').style.display = 'none';
+  document.getElementById('fluid_final_result').style.display = 'none';
+}
+
+// 수유량 변경 추가
+function addChange() {
+  const hour = document.getElementById('change_hour').value;
+  const minute = document.getElementById('change_minute').value;
+  const volume = parseFloat(document.getElementById('change_volume').value);
+
+  if (hour === '' || !volume) {
+    alert('변경 시각과 수유량을 입력해주세요.');
+    return;
+  }
+
+  const changeTimeMinutes = parseInt(hour) * 60 + parseInt(minute);
+  
+  // 중복 체크
+  const duplicate = fluidChanges.find(c => c.timeMinutes === changeTimeMinutes);
+  if (duplicate) {
+    alert('이미 해당 시각에 변경 내역이 있습니다.');
+    return;
+  }
+
+  fluidChanges.push({
+    hour: parseInt(hour),
+    minute: parseInt(minute),
+    timeMinutes: changeTimeMinutes,
+    volume: volume
+  });
+
+  // 시간순 정렬
+  fluidChanges.sort((a, b) => a.timeMinutes - b.timeMinutes);
+
+  updateChangesList();
+  recalculateFluid();
+  
+  // 입력 초기화
+  document.getElementById('change_hour').value = '';
+  document.getElementById('change_minute').value = '0';
+  document.getElementById('change_volume').value = '';
+}
+
+// 변경 내역 목록 업데이트
+function updateChangesList() {
+  const container = document.getElementById('changes_container');
+  container.innerHTML = '';
+
+  fluidChanges.forEach((change, index) => {
+    const item = document.createElement('div');
+    item.className = 'change-item';
+    item.innerHTML = `
+      <div class="change-info">
+        <div class="change-time">${String(change.hour).padStart(2,'0')}:${String(change.minute).padStart(2,'0')}</div>
+        <div class="change-volume">수유량: ${change.volume} mL</div>
+      </div>
+      <button class="btn-danger" onclick="removeChange(${index})">삭제</button>
+    `;
+    container.appendChild(item);
+  });
+
+  document.getElementById('changes_summary').style.display = fluidChanges.length > 0 ? 'block' : 'none';
+}
+
+// 변경 내역 삭제
+function removeChange(index) {
+  fluidChanges.splice(index, 1);
+  updateChangesList();
+  if (fluidChanges.length === 0) {
+    document.getElementById('fluid_final_result').style.display = 'none';
+  } else {
+    recalculateFluid();
+  }
+}
+
+// 수액 재계산
+function recalculateFluid() {
+  if (!baseFluidData || fluidChanges.length === 0) {
+    return;
+  }
+
+  // 변경 구간별 계산
+  let resultHTML = '<div class="summary"><b>구간별 수액 속도</b></div>';
+  
+  // 시작: 06:00 (360분)
+  let currentTime = 360;
+  let previousVolume = baseFluidData.baseFeeding;
+  
+  fluidChanges.forEach((change, index) => {
+    const changeTime = change.timeMinutes < 360 ? change.timeMinutes + 1440 : change.timeMinutes;
+    
+    // 이전 구간 계산
+    const duration = (changeTime - currentTime) / 60; // 시간
+    const feedCount = FEED_TIMES.filter(ft => {
+      const ftMin = ft < 6 ? (ft + 24) * 60 : ft * 60;
+      return ftMin >= currentTime && ftMin < changeTime;
+    }).length;
+    
+    const feedingInPeriod = previousVolume * feedCount;
+    const effectiveFeeding = (baseFluidData.includeMl / baseFluidData.baseFeeding) * feedingInPeriod;
+    const requiredInPeriod = (baseFluidData.totalRequired / 24) * duration;
+    const fluidInPeriod = requiredInPeriod - effectiveFeeding;
+    const fluidRate = duration > 0 ? fluidInPeriod / duration : 0;
+    
+    const startHour = Math.floor(currentTime / 60) % 24;
+    const startMin = currentTime % 60;
+    const endHour = Math.floor(changeTime / 60) % 24;
+    const endMin = changeTime % 60;
+    
+    const isNight = (startHour >= 23 || startHour < 6);
+    
+    resultHTML += `
+      <div class="result-row ${isNight ? 'night' : ''}">
+        <span>${String(startHour).padStart(2,'0')}:${String(startMin).padStart(2,'0')} ~ ${String(endHour).padStart(2,'0')}:${String(endMin).padStart(2,'0')}</span>
+        <span>${fluidRate.toFixed(2)} mL/hr</span>
+      </div>
+    `;
+    
+    currentTime = changeTime;
+    previousVolume = change.volume;
+  });
+  
+  // 마지막 구간 (다음날 06:00까지)
+  const endTime = 360 + 1440; // 다음날 06:00
+  const duration = (endTime - currentTime) / 60;
+  const feedCount = FEED_TIMES.filter(ft => {
+    const ftMin = ft < 6 ? (ft + 24) * 60 : ft * 60;
+    return ftMin >= currentTime && ftMin < endTime;
+  }).length;
+  
+  const feedingInPeriod = previousVolume * feedCount;
+  const effectiveFeeding = (baseFluidData.includeMl / baseFluidData.baseFeeding) * feedingInPeriod;
+  const requiredInPeriod = (baseFluidData.totalRequired / 24) * duration;
+  const fluidInPeriod = requiredInPeriod - effectiveFeeding;
+  const fluidRate = duration > 0 ? fluidInPeriod / duration : 0;
+  
+  const startHour = Math.floor(currentTime / 60) % 24;
+  const startMin = currentTime % 60;
+  
+  const isNight = (startHour >= 23 || startHour < 6);
+  
+  resultHTML += `
+    <div class="result-row ${isNight ? 'night' : ''}">
+      <span>${String(startHour).padStart(2,'0')}:${String(startMin).padStart(2,'0')} ~ 06:00</span>
+      <span>${fluidRate.toFixed(2)} mL/hr</span>
+    </div>
+  `;
+
+  document.getElementById('fluid_final_result').innerHTML = resultHTML;
+  document.getElementById('fluid_final_result').style.display = 'block';
+}
+
+// 초기 로드
+window.onload = function() {
+  loadDrugDefaults();
+};
+</script>
+
+</body>
+</html>
